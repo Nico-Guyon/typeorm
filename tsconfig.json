@@ -22,14 +22,14 @@
         "downlevelIteration": true
     },
     "include": [
-      "sample",
       "src",
-      "test"
     ],
     "exclude": [
         "tmp",
         "temp",
         "build",
+        "sample",
+        "test",
         "node_modules"
     ]
 }
