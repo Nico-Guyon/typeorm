@@ -121,18 +121,22 @@ export class FindOptionsUtils {
                 if (!metadata.findColumnWithPropertyPath(key))
                     throw new Error(`${key} column was not found in the ${metadata.name} entity.`);
 
+                const orderKey = key.includes('.')
+                    ? `${qb.alias}_${key}`
+                    : `${qb.alias}.${key}`;
+
                 switch (order) {
                     case 1:
-                        qb.addOrderBy(qb.alias + "." + key, "ASC");
+                        qb.addOrderBy(orderKey, "ASC");
                         break;
                     case -1:
-                        qb.addOrderBy(qb.alias + "." + key, "DESC");
+                        qb.addOrderBy(orderKey, "DESC");
                         break;
                     case "ASC":
-                        qb.addOrderBy(qb.alias + "." + key, "ASC");
+                        qb.addOrderBy(orderKey, "ASC");
                         break;
                     case "DESC":
-                        qb.addOrderBy(qb.alias + "." + key, "DESC");
+                        qb.addOrderBy(orderKey, "DESC");
                         break;
                 }
             });
