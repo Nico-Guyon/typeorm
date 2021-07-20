@@ -656,6 +656,24 @@ export class EntityMetadata {
         const relation = this.relations.find(relation => relation.propertyPath === propertyPath);
         if (relation && relation.joinColumns.length === 1)
             return relation.joinColumns[0];
+        
+        // we can check here if the propertyPath asked here is a property from
+        // a relation for example user.firstName
+        const path = propertyPath.split('.').reverse();
+
+        if (path.length > 1) {
+            const entity = path.pop();
+            const rel = this.relations.find((p) => p.propertyPath === entity);
+
+            const property = path.pop();
+            const metadata = rel?.inverseEntityMetadata.columns.find(
+                (p) => p.propertyPath === property,
+            );
+
+            if (metadata !== undefined) {
+                return metadata;
+            }
+        }
 
         return undefined;
     }
