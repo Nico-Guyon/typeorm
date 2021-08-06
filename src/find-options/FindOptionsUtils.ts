@@ -122,7 +122,7 @@ export class FindOptionsUtils {
                     throw new Error(`${key} column was not found in the ${metadata.name} entity.`);
 
                 const orderKey = key.includes('.')
-                    ? `${qb.alias}_${key}`
+                    ? `${qb.alias}__${key.replace('.', '_')}`
                     : `${qb.alias}.${key}`;
 
                 switch (order) {
