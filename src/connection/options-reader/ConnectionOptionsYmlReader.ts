@@ -24,7 +24,7 @@ export class ConnectionOptionsYmlReader {
             return [];
         }
 
-        return Object.keys(config).map(connectionName => {
+        return Object.keys(config || {}).map(connectionName => {
             return Object.assign({ name: connectionName }, (config as any)[connectionName]);
         });
     }
