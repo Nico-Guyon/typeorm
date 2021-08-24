@@ -197,7 +197,7 @@ export class FindOptionsUtils {
                     throw new Error(`${key} column was not found in the ${metadata.name} entity.`);
 
                 const orderKey = key.includes('.')
-                    ? `${qb.alias}__${key.replace('.', '_')}`
+                    ? `${qb.alias}_${key.replace('.', '_')}`
                     : `${qb.alias}.${key}`;
 
                 switch (order) {
@@ -244,7 +244,7 @@ export class FindOptionsUtils {
         matchedBaseRelations.forEach(relation => {
 
             // generate a relation alias
-            let relationAlias: string = DriverUtils.buildAlias(qb.connection.driver, { shorten: true, joiner: "__" }, alias, relation);
+            let relationAlias: string = DriverUtils.buildAlias(qb.connection.driver, { shorten: true, joiner: "_" }, alias, relation);
 
             // add a join for the found relation
             const selection = alias + "." + relation;
