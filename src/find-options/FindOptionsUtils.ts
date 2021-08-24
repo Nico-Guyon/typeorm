@@ -196,9 +196,24 @@ export class FindOptionsUtils {
                 if (!metadata.findColumnWithPropertyPath(key))
                     throw new Error(`${key} column was not found in the ${metadata.name} entity.`);
 
-                const orderKey = key.includes('.')
-                    ? `${qb.alias}_${key.replace('.', '_')}`
-                    : `${qb.alias}.${key}`;
+                let orderKey = '';
+
+                if (key.includes('.')) {
+                    // We need here to check if the first element is an eager relation
+                    const target = key.split('.')[0];
+                    const relation = metadata.relations.find(
+                        (r) => r.propertyName == target,
+                    );
+
+                    // The prefix is different between an explicit loaded relation and an eager one
+                    if (relation?.isEager) {
+                        orderKey = `${qb.alias}_${key.replace('.', '_')}`;
+                    } else {
+                        orderKey = `${qb.alias}__${key.replace('.', '_')}`;
+                    }
+                } else {
+                    orderKey = `${qb.alias}.${key}`;
+                }
 
                 switch (order) {
                     case 1:
@@ -244,7 +259,7 @@ export class FindOptionsUtils {
         matchedBaseRelations.forEach(relation => {
 
             // generate a relation alias
-            let relationAlias: string = DriverUtils.buildAlias(qb.connection.driver, { shorten: true, joiner: "_" }, alias, relation);
+            let relationAlias: string = DriverUtils.buildAlias(qb.connection.driver, { shorten: true, joiner: "__" }, alias, relation);
 
             // add a join for the found relation
             const selection = alias + "." + relation;
