@@ -199,18 +199,14 @@ export class FindOptionsUtils {
                 let orderKey = '';
 
                 if (key.includes('.')) {
-                    // We need here to check if the first element is an eager relation
-                    const target = key.split('.')[0];
-                    const relation = metadata.relations.find(
-                        (r) => r.propertyName == target,
-                    );
-
+                    // We need to reconstruct the alias for this key
                     // The prefix is different between an explicit loaded relation and an eager one
-                    if (relation?.isEager) {
-                        orderKey = `${qb.alias}_${key.replace('.', '_')}`;
-                    } else {
-                        orderKey = `${qb.alias}__${key.replace('.', '_')}`;
-                    }
+                    // a field is linked on the alias by a single _
+                    // an eager relation by a single _
+                    // an explicit relation by a double __
+                    
+                    const path = key.split('.').reverse();
+                    orderKey = this.constructAlias(path, metadata, qb.alias);
                 } else {
                     orderKey = `${qb.alias}.${key}`;
                 }
@@ -232,6 +228,33 @@ export class FindOptionsUtils {
             });
 
         return qb;
+    }
+
+    static constructAlias(path: string[], metadata: EntityMetadata, alias: string): string{
+        if (path.length >= 1) {
+            const property = path.pop();
+
+            // property is either a metadata or a relation
+            if (path.length === 0) {
+                const test = metadata.columns.find(
+                    (p) => p.propertyPath === property,
+                );
+
+                return `${alias}_${test?.propertyPath}`;
+            }
+
+            const rel = metadata.relations.find((p) => p.propertyPath === property);
+            const met = rel?.inverseEntityMetadata;
+            const joiner = rel?.isEager ? '_' : '__';
+            
+            return this.constructAlias(
+                path,
+                met as EntityMetadata,
+                `${alias}${joiner}${property}`
+            );
+        }
+
+        return '';
     }
 
     // -------------------------------------------------------------------------
